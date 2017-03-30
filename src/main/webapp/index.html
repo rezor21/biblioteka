@@ -1,0 +1,152 @@
+<html lang='pl'>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'>
+    <title>Hello AngularJS</title>
+    <link href="frontend/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        [ng\:cloak], [ng-cloak], .ng-cloak {
+            display: none !important;
+        }
+    </style>
+    <style>
+        .center-block{
+            float: none;
+        }
+    </style>
+</head>
+
+<body ng-app="aplikacja">
+
+<div class="container"  ng-controller="tableController">
+    <div class="row">
+        <div class="col-sm-8 center-block">
+            <h1 class="text-center">Domowa biblioteka zawiera {{books.length}} książek</h1>
+            <br>
+            <span class="input-group-addon">Szukaj: </span>
+            <input type="text" class="form-control" placeholder="Jakiej słowa szukasz?" ng-model="search">
+        </div>
+
+        <br>
+
+        <div class="table-responsive">
+            Sortuj według:
+            <select data-ng-model="sortBy">
+                <option selected>id</option>
+                <option value="title">Tytułu</option>
+                <option value="pages">Liczby stron</option>
+                <option value="authorName">Autora</option>
+            </select>
+            <table class="table table-hover">
+                <thead>
+
+                    <tr>
+                        <th ng-repeat="naglowek in ['tytuł', 'liczba stron', 'autor']">
+                            {{naglowek}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="book in books | filter : search | orderBy:sortBy">
+                        <td>{{book.title}}</td>
+                        <td>{{book.pages}}</td>
+                        <td>{{book.authorName}}</td>
+                        <td>
+                            <button class="btn btn-info" ng-click="updateOneBook(book.id)">Aktualizuj</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" ng-click="deleteOneBook(book.id)">Usuń</button>
+                        </td>
+
+
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+        <div class="addbook">
+            <form name="dodaj">
+                <p class="">Podaj dane, aby zaktualizować (następnie kliknij przycisk "aktualizuj" przy danej książce)<br> lub dodać książkę (i kliknij przycisk "dodaj" poniżej):</p>
+                <input type="search" placeholder="tytuł" ng-model="title"/><br>
+                <input type="search" placeholder="liczba stron" ng-model="pages"/><br>
+                <input type="search" placeholder="autor" ng-model="authorName"/><br>
+            </form>
+            <button class="btn btn-success" ng-click="addOneBook()">Dodaj</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="frontend/js/angular.min.js"></script>
+
+<script>
+    var aplikacja  = angular.module('aplikacja', []);
+
+
+    aplikacja.controller('tableController',[ '$scope', '$http', '$filter', function( $scope, $http, $filter) {
+
+            $http.get("/book/")
+                .then(function (response) {
+                    $scope.books=response.data;
+                })
+
+        $scope.deleteOneBook=function (id) {
+            var url="/book/"+id;
+            $http.delete(url)
+                .then(function (response) {
+                    $scope.del=response.data;
+                })
+
+            window.location = location.href;
+        }
+
+        $scope.addOneBook=function () {
+            var url="/book/";
+            var param=JSON.stringify({
+                id: 0,
+                title: $scope.title,
+                pages: $scope.pages,
+                authorName: $scope.authorName
+            })
+            $http.post(url, param)
+                .then(function (response) {
+                    $scope.dodaj=response.data;
+                })
+
+            window.location = location.href;
+        }
+
+        $scope.updateOneBook=function (id) {
+            var url="/book/"+id;
+            var param=JSON.stringify({
+                id: id,
+                title: $scope.title,
+                pages: $scope.pages,
+                authorName: $scope.authorName
+            })
+            $http.put(url, param)
+                .then(function (response) {
+                    $scope.aktu=response.data;
+                })
+
+            window.location = location.href;
+
+
+        }
+
+
+    }]);
+
+
+
+
+
+
+</script>
+
+<script src="frontend/js/bootstrap.min.js"></script>
+
+<script src="frontend/js/jquery-3.2.0.min"></script>
+</body>
+</html>
